@@ -7,16 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        'cosmic-darkBlue': '#1a1b4b',
-        'cosmic-purple': '#6b46c1',
-        'cosmic-gold': '#f6e05e',
-        'alien-glow': '#10B981',
-        'alien-crystal': '#805ad5',
-        'alien-energy': '#6b46c1',
+        'cosmic-darkBlue': '#0B1120',
+        'cosmic-purple': '#6B46C1',
+        'cosmic-gold': '#F6E05E',
+        'alien-glow': '#00FF9D',
+        'alien-crystal': '#4FD1C5',
+        'alien-energy': '#805AD5',
       },
       fontFamily: {
         'medieval': ['MedievalSharp', 'cursive'],
-        'tech': ['Share Tech Mono', 'monospace'],
+        'tech': ['Orbitron', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',

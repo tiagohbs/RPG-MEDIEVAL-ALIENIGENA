@@ -3,15 +3,7 @@
  */
 
 // Telas disponíveis no jogo
-export type GameScreen = 
-  | 'splash' 
-  | 'login' 
-  | 'character-creation' 
-  | 'character-selection' 
-  | 'game-hub'
-  | 'battle'
-  | 'missions'
-  | 'inventory';
+export type GameScreen = 'homepage' | 'character-creation' | 'game-world' | 'combat' | 'dialogue' | 'battle';
 
 // Dados do usuário
 export interface User {
@@ -33,20 +25,31 @@ export interface CharacterAttributes {
 export interface Character {
   id: string;
   name: string;
+  race: Race;
+  class: Class;
   level: number;
-  experience: number;
-  experienceToNext: number;
   health: number;
   maxHealth: number;
-  attributes: CharacterAttributes;
-  createdAt: Date;
+  mana: number;
+  maxMana: number;
+  experience: number;
+  inventory: Item[];
+  position: {
+    x: number;
+    y: number;
+  };
+  attributes: {
+    strength: number;
+    dexterity: number;
+    intelligence: number;
+    vitality: number;
+  };
 }
 
 // Notificações do sistema
 export interface Notification {
   id: string;
-  type: 'success' | 'warning' | 'error' | 'info';
-  title: string;
+  type: 'info' | 'success' | 'warning' | 'error';
   message: string;
   timestamp: Date;
 }
@@ -54,15 +57,24 @@ export interface Notification {
 // Mensagens do chat
 export interface Message {
   id: string;
-  type: 'global' | 'private' | 'system';
   sender: string;
   content: string;
   timestamp: Date;
+  read: boolean;
 }
 
 // Estado global do jogo
 export interface GameState {
   currentScreen: GameScreen;
+  player?: Character;
+  enemies: Character[];
+  dialogue?: {
+    text: string;
+    options: {
+      text: string;
+      action: () => void;
+    }[];
+  };
   isLoading: boolean;
   user: User | null;
   characters: Character[];
@@ -81,4 +93,30 @@ export type GameAction =
   | { type: 'SELECT_CHARACTER'; payload: string }
   | { type: 'LOAD_CHARACTERS' }
   | { type: 'ADD_NOTIFICATION'; payload: Notification }
-  | { type: 'REMOVE_NOTIFICATION'; payload: string };
+  | { type: 'REMOVE_NOTIFICATION'; payload: string }
+  | { type: 'CREATE_CHARACTER'; payload: Character }
+  | { type: 'UPDATE_CHARACTER'; payload: Partial<Character> }
+  | { type: 'ADD_ENEMY'; payload: Character }
+  | { type: 'REMOVE_ENEMY'; payload: string }
+  | { type: 'UPDATE_ENEMY'; payload: { id: string; updates: Partial<Character> } }
+  | { type: 'SET_DIALOGUE'; payload: GameState['dialogue'] }
+  | { type: 'CLEAR_DIALOGUE' };
+
+export type Race = 'human' | 'alien' | 'hybrid';
+export type Class = 'warrior' | 'mage' | 'rogue' | 'scientist';
+
+export interface Item {
+  id: string;
+  name: string;
+  type: 'weapon' | 'armor' | 'potion' | 'artifact';
+  description: string;
+  value: number;
+  effects?: {
+    health?: number;
+    mana?: number;
+    strength?: number;
+    dexterity?: number;
+    intelligence?: number;
+    vitality?: number;
+  };
+}

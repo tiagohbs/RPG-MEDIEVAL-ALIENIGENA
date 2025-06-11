@@ -297,10 +297,12 @@ export function BattleProvider({ children }: { children: React.ReactNode }) {
 }
 
 // Hook personalizado para usar o contexto
-export function useBattle() {
+const useBattle = () => {
   const context = useContext(BattleContext);
   if (context === undefined) {
     throw new Error('useBattle deve ser usado dentro de um BattleProvider');
   }
   return context;
-} 
+};
+
+export { BattleProvider, useBattle }; 
