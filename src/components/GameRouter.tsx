@@ -1,46 +1,46 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useGame } from '../contexts/GameContext';
-import SplashScreen from './screens/SplashScreen';
-import LoginScreen from './screens/LoginScreen';
-import CharacterCreationScreen from './screens/CharacterCreationScreen';
-import CharacterSelectionScreen from './screens/CharacterSelectionScreen';
-import GameHubScreen from './screens/GameHubScreen';
+import CharacterCreation from './screens/CharacterCreation';
+import GameWorld from './screens/GameWorld';
+import Combat from './screens/Combat';
+import Dialogue from './screens/Dialogue';
+import BattleScene from './battle/BattleScene';
+import { BattleProvider } from '../contexts/BattleContext';
 
 /**
  * Roteador principal do jogo
  * Gerencia a navegação entre as diferentes telas
  */
-function GameRouter() {
-  const { state, dispatch } = useGame();
+const GameRouter: React.FC = () => {
+  const { currentScreen } = useGame();
 
-  // Carregar dados salvos ao inicializar
-  useEffect(() => {
-    dispatch({ type: 'LOAD_CHARACTERS' });
-  }, [dispatch]);
-
-  // Renderizar a tela atual baseada no estado
-  const renderCurrentScreen = () => {
-    switch (state.currentScreen) {
-      case 'splash':
-        return <SplashScreen />;
-      case 'login':
-        return <LoginScreen />;
+  // Renderiza a tela apropriada baseada na fase do jogo
+  const renderScreen = (): React.ReactElement => {
+    switch (currentScreen) {
       case 'character-creation':
-        return <CharacterCreationScreen />;
-      case 'character-selection':
-        return <CharacterSelectionScreen />;
-      case 'game-hub':
-        return <GameHubScreen />;
+        return <CharacterCreation />;
+      case 'game-world':
+        return <GameWorld />;
+      case 'combat':
+        return <Combat />;
+      case 'dialogue':
+        return <Dialogue />;
+      case 'battle':
+        return (
+          <BattleProvider>
+            <BattleScene />
+          </BattleProvider>
+        );
       default:
-        return <SplashScreen />;
+        return <CharacterCreation />;
     }
   };
 
   return (
-    <div className="min-h-screen">
-      {renderCurrentScreen()}
+    <div className="relative z-10 w-full h-screen">
+      {renderScreen()}
     </div>
   );
-}
+};
 
 export default GameRouter;

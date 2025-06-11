@@ -1,89 +1,131 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { GameState, GameAction, Character } from '../types/game';
 
-// Estado inicial do jogo
+// Tipos
+export type GameScreen = 'character-creation' | 'game-world' | 'combat' | 'dialogue' | 'battle';
+
+export interface GameState {
+  currentScreen: GameScreen;
+  character: {
+    nome: string;
+    raca: string;
+    classe: string;
+    nivel: number;
+    vida: number;
+    vidaMaxima: number;
+    forca: number;
+    defesa: number;
+    agilidade: number;
+  } | null;
+  inimigos: Array<{
+    id: string;
+    nome: string;
+    tipo: string;
+    vida: number;
+    vidaMaxima: number;
+    forca: number;
+    defesa: number;
+    agilidade: number;
+  }>;
+  dialogoAtual: {
+    npc: string;
+    texto: string;
+    opcoes: Array<{
+      texto: string;
+      acao: () => void;
+    }>;
+  } | null;
+}
+
+// Ações
+type GameAction =
+  | { type: 'SET_SCREEN'; payload: GameScreen }
+  | { type: 'CREATE_CHARACTER'; payload: GameState['character'] }
+  | { type: 'UPDATE_CHARACTER'; payload: Partial<GameState['character']> }
+  | { type: 'ADD_ENEMY'; payload: GameState['inimigos'][0] }
+  | { type: 'REMOVE_ENEMY'; payload: string }
+  | { type: 'UPDATE_ENEMY'; payload: { id: string; updates: Partial<GameState['inimigos'][0]> } }
+  | { type: 'SET_DIALOGUE'; payload: GameState['dialogoAtual'] }
+  | { type: 'CLEAR_DIALOGUE' };
+
+// Estado inicial
 const initialState: GameState = {
-  currentScreen: 'splash',
-  isLoading: false,
-  user: null,
-  characters: [],
-  selectedCharacter: null,
-  notifications: [],
-  messages: []
+  currentScreen: 'character-creation',
+  character: null,
+  inimigos: [],
+  dialogoAtual: null,
 };
 
-// Contexto do jogo
-const GameContext = createContext<{
-  state: GameState;
-  dispatch: React.Dispatch<GameAction>;
-} | null>(null);
-
-/**
- * Reducer para gerenciar o estado do jogo
- */
+// Reducer
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'SET_SCREEN':
-      return { ...state, currentScreen: action.payload };
-    
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    
-    case 'SET_USER':
-      return { ...state, user: action.payload };
-    
-    case 'ADD_CHARACTER':
-      const newCharacters = [...state.characters, action.payload];
-      // Salvar no localStorage
-      localStorage.setItem('rpg_characters', JSON.stringify(newCharacters));
-      return { ...state, characters: newCharacters };
-    
-    case 'DELETE_CHARACTER':
-      const filteredCharacters = state.characters.filter(char => char.id !== action.payload);
-      localStorage.setItem('rpg_characters', JSON.stringify(filteredCharacters));
-      return { ...state, characters: filteredCharacters };
-    
-    case 'SELECT_CHARACTER':
-      localStorage.setItem('rpg_selected_character', action.payload);
-      return { 
-        ...state, 
-        selectedCharacter: state.characters.find(char => char.id === action.payload) || null 
+      return {
+        ...state,
+        currentScreen: action.payload,
       };
-    
-    case 'LOAD_CHARACTERS':
-      const savedCharacters = localStorage.getItem('rpg_characters');
-      const savedSelectedId = localStorage.getItem('rpg_selected_character');
-      const characters = savedCharacters ? JSON.parse(savedCharacters) : [];
-      const selectedCharacter = savedSelectedId 
-        ? characters.find((char: Character) => char.id === savedSelectedId) || null
-        : null;
-      
-      return { 
-        ...state, 
-        characters,
-        selectedCharacter
+
+    case 'CREATE_CHARACTER':
+      return {
+        ...state,
+        character: action.payload,
       };
-    
-    case 'ADD_NOTIFICATION':
-      return { 
-        ...state, 
-        notifications: [...state.notifications, action.payload] 
+
+    case 'UPDATE_CHARACTER':
+      if (!state.character) return state;
+      return {
+        ...state,
+        character: {
+          ...state.character,
+          ...action.payload,
+        },
       };
-    
-    case 'REMOVE_NOTIFICATION':
-      return { 
-        ...state, 
-        notifications: state.notifications.filter(notif => notif.id !== action.payload) 
+
+    case 'ADD_ENEMY':
+      return {
+        ...state,
+        inimigos: [...state.inimigos, action.payload],
       };
-    
+
+    case 'REMOVE_ENEMY':
+      return {
+        ...state,
+        inimigos: state.inimigos.filter((inimigo) => inimigo.id !== action.payload),
+      };
+
+    case 'UPDATE_ENEMY':
+      return {
+        ...state,
+        inimigos: state.inimigos.map((inimigo) =>
+          inimigo.id === action.payload.id
+            ? { ...inimigo, ...action.payload.updates }
+            : inimigo
+        ),
+      };
+
+    case 'SET_DIALOGUE':
+      return {
+        ...state,
+        dialogoAtual: action.payload,
+      };
+
+    case 'CLEAR_DIALOGUE':
+      return {
+        ...state,
+        dialogoAtual: null,
+      };
+
     default:
       return state;
   }
 }
 
-/**
- * Provider do contexto do jogo
- */
+// Contexto
+const GameContext = createContext<{
+  state: GameState;
+  dispatch: React.Dispatch<GameAction>;
+} | undefined>(undefined);
+
+// Provedor
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
@@ -94,13 +136,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Hook para usar o contexto do jogo
- */
+// Hook personalizado
 export function useGame() {
   const context = useContext(GameContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useGame deve ser usado dentro de um GameProvider');
   }
-  return context;
+  return {
+    ...context.state,
+    dispatch: context.dispatch,
+  };
 }
