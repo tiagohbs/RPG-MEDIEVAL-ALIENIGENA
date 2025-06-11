@@ -4,7 +4,7 @@ import CharacterCreation from './screens/CharacterCreation';
 import GameWorld from './screens/GameWorld';
 import Combat from './screens/Combat';
 import Dialogue from './screens/Dialogue';
-import BattleScene from './battle/BattleScene';
+import { BattleScene } from './battle/BattleScene';
 import { BattleProvider } from '../contexts/BattleContext';
 
 /**
