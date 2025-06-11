@@ -6,6 +6,7 @@ import Combat from './screens/Combat';
 import Dialogue from './screens/Dialogue';
 import { BattleScene } from './battle/BattleScene';
 import { BattleProvider } from '../contexts/BattleContext';
+import HomepageScreen from './screens/HomepageScreen';
 
 /**
  * Roteador principal do jogo
@@ -17,6 +18,8 @@ const GameRouter: React.FC = () => {
   // Renderiza a tela apropriada baseada na fase do jogo
   const renderScreen = (): React.ReactElement => {
     switch (currentScreen) {
+      case 'homepage':
+        return <HomepageScreen />;
       case 'character-creation':
         return <CharacterCreation />;
       case 'game-world':
@@ -32,7 +35,7 @@ const GameRouter: React.FC = () => {
           </BattleProvider>
         );
       default:
-        return <CharacterCreation />;
+        return <HomepageScreen />;
     }
   };
 

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 
 // Tipos
-export type GameScreen = 'character-creation' | 'game-world' | 'combat' | 'dialogue' | 'battle';
+export type GameScreen = 'homepage' | 'character-creation' | 'game-world' | 'combat' | 'dialogue' | 'battle';
 
 export interface GameState {
   currentScreen: GameScreen;
@@ -49,7 +49,7 @@ type GameAction =
 
 // Estado inicial
 const initialState: GameState = {
-  currentScreen: 'character-creation',
+  currentScreen: 'homepage',
   character: null,
   inimigos: [],
   dialogoAtual: null,
